@@ -1,0 +1,31 @@
+{
+  "data_coleta": "2026-10-01",
+  "fonte": "IBGE/6579",
+  "payload": [
+    {
+      "id": "9324",
+      "variavel": "População residente estimada",
+      "unidade": "Pessoas",
+      "resultados": [
+        {
+          "classificacoes": [],
+          "series": [
+            {
+              "localidade": {
+                "id": "3550308",
+                "nivel": {
+                  "id": "N6",
+                  "nome": "Município"
+                },
+                "nome": "São Paulo (SP)"
+              },
+              "serie": {
+                "2026": "11911337"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

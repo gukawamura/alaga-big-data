@@ -1,0 +1,12 @@
+[
+  { "bairro_id": "SP001", "bairro": "Lapa (Marginal Tietê)",        "distrito": "Lapa",             "latitude": -23.5280, "longitude": -46.7050, "populacao": 68848 },
+  { "bairro_id": "SP002", "bairro": "Vila Maria (Marginal Tietê)",  "distrito": "Vila Maria",       "latitude": -23.5120, "longitude": -46.5860, "populacao": 113845 },
+  { "bairro_id": "SP003", "bairro": "Jaguaré",                       "distrito": "Jaguaré",          "latitude": -23.5460, "longitude": -46.7600, "populacao": 49863 },
+  { "bairro_id": "SP004", "bairro": "Ipiranga (Ricardo Jafet)",     "distrito": "Ipiranga",         "latitude": -23.5950, "longitude": -46.6100, "populacao": 108706 },
+  { "bairro_id": "SP005", "bairro": "Vila Prudente",                "distrito": "Vila Prudente",    "latitude": -23.5840, "longitude": -46.5800, "populacao": 103838 },
+  { "bairro_id": "SP006", "bairro": "Santo Amaro (Jurubatuba)",     "distrito": "Santo Amaro",      "latitude": -23.6550, "longitude": -46.7050, "populacao": 71316 },
+  { "bairro_id": "SP007", "bairro": "Jardim Ângela (M'Boi Mirim)",  "distrito": "Jardim Ângela",    "latitude": -23.6830, "longitude": -46.7660, "populacao": 295434 },
+  { "bairro_id": "SP008", "bairro": "Penha (Rio Tiquatira)",        "distrito": "Penha",            "latitude": -23.5330, "longitude": -46.5430, "populacao": 127820 },
+  { "bairro_id": "SP009", "bairro": "Pinheiros (Cidade Jardim)",    "distrito": "Pinheiros",        "latitude": -23.5880, "longitude": -46.6970, "populacao": 65364 },
+  { "bairro_id": "SP010", "bairro": "Butantã (Rio Pirajuçara)",     "distrito": "Butantã",          "latitude": -23.5710, "longitude": -46.7280, "populacao": 54196 }
+]

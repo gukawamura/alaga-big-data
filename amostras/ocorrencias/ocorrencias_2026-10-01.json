@@ -1,0 +1,125 @@
+{
+  "data_coleta": "2026-10-01",
+  "ocorrencias": [
+    {
+      "protocolo": "c67d5f0746",
+      "bairro_id": "SP002",
+      "data_hora": "2026-10-01T20:02:00",
+      "nome": "Elena Santos",
+      "telefone": "11 91229-6368",
+      "cpf": "736.683.629-11",
+      "relato": "Rua começando a alagar",
+      "nivel_agua_cm": 10
+    },
+    {
+      "protocolo": "b261091007",
+      "bairro_id": "SP010",
+      "data_hora": "2026-10-01T23:41:00",
+      "nome": "Iris Almeida",
+      "telefone": "11 99216-1613",
+      "cpf": "369.117.271-12",
+      "relato": "Rua começando a alagar",
+      "nivel_agua_cm": 10
+    },
+    {
+      "protocolo": "506800bd8e",
+      "bairro_id": "SP005",
+      "data_hora": "2026-10-01T03:06:00",
+      "nome": "Iris Silva",
+      "telefone": "11 91942-1656",
+      "cpf": "856.310.301-12",
+      "relato": "Bueiro entupido",
+      "nivel_agua_cm": 80
+    },
+    {
+      "protocolo": "1632f51f86",
+      "bairro_id": "SP005",
+      "data_hora": "2026-10-01T21:44:00",
+      "nome": "Ana Pereira",
+      "telefone": "11 93193-6388",
+      "cpf": "532.718.704-74",
+      "relato": "Carro parado na água",
+      "nivel_agua_cm": 10
+    },
+    {
+      "protocolo": "2d2c289af7",
+      "bairro_id": "SP008",
+      "data_hora": "2026-10-01T01:13:00",
+      "nome": "Bruno Souza",
+      "telefone": "11 96207-8575",
+      "cpf": "803.723.452-13",
+      "relato": "Córrego transbordando",
+      "nivel_agua_cm": 120
+    },
+    {
+      "protocolo": "1eecde6718",
+      "bairro_id": "SP001",
+      "data_hora": "2026-10-01T06:29:00",
+      "nome": "Diego Costa",
+      "telefone": "11 93052-3900",
+      "cpf": "262.239.175-66",
+      "relato": "Córrego transbordando",
+      "nivel_agua_cm": 35
+    },
+    {
+      "protocolo": "aeb287a3c2",
+      "bairro_id": "SP010",
+      "data_hora": "2026-10-01T07:18:00",
+      "nome": "Heitor Oliveira",
+      "telefone": "11 95160-9575",
+      "cpf": "849.917.874-13",
+      "relato": "Água subindo rápido",
+      "nivel_agua_cm": 35
+    },
+    {
+      "protocolo": "e35baa9af2",
+      "bairro_id": "SP008",
+      "data_hora": "2026-10-01T08:41:00",
+      "nome": "João Santos",
+      "telefone": "11 98889-2255",
+      "cpf": "182.424.801-19",
+      "relato": "Bueiro entupido",
+      "nivel_agua_cm": 35
+    },
+    {
+      "protocolo": "25d5d28aa9",
+      "bairro_id": "SP003",
+      "data_hora": "2026-10-01T13:26:00",
+      "nome": "Bruno Silva",
+      "telefone": "11 99046-3897",
+      "cpf": "937.650.800-92",
+      "relato": "Rua começando a alagar",
+      "nivel_agua_cm": 35
+    },
+    {
+      "protocolo": "94e754c001",
+      "bairro_id": "SP003",
+      "data_hora": "2026-10-01T08:25:00",
+      "nome": "Elena Silva",
+      "telefone": "11 92728-2459",
+      "cpf": "317.302.881-89",
+      "relato": "Carro parado na água",
+      "nivel_agua_cm": 35
+    },
+    {
+      "protocolo": "c91ab17aa3",
+      "bairro_id": "SP005",
+      "data_hora": "2026-10-01T18:57:00",
+      "nome": "Bruno Souza",
+      "telefone": "11 93315-5737",
+      "cpf": "935.920.395-84",
+      "relato": "Água subindo rápido",
+      "nivel_agua_cm": 80
+    },
+    {
+      "protocolo": "54694a552e",
+      "bairro_id": "SP009",
+      "data_hora": "2026-10-01T18:58:00",
+      "nome": "João Santos",
+      "telefone": "11 92029-2743",
+      "cpf": "757.367.509-12",
+      "relato": "Rua começando a alagar",
+      "nivel_agua_cm": 120
+    }
+  ]
+}
