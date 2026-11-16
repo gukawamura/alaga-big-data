@@ -97,5 +97,5 @@ big-data/
 
 ## Links
 
-- Repositório (este): https://github.com/gu-Kawamura/alaga-big-data
-- Repositório GenAI (consome a camada Ouro): https://github.com/gu-Kawamura/alaga-genai
+- Repositório (este): https://github.com/gukawamura/alaga-big-data
+- Repositório GenAI (consome a camada Ouro): https://github.com/gukawamura/alaga-genai
