@@ -12,14 +12,23 @@ from pyspark.sql import functions as F
 from pyspark.sql import DataFrame
 
 # COMMAND ----------
+def ler_array_json(df: DataFrame, nome: str, esquema: str):
+    """Normaliza tanto as colunas texto do Auto Loader quanto arrays estruturados."""
+    coluna = F.col(nome)
+    if df.schema[nome].dataType.typeName() != "string":
+        coluna = F.to_json(coluna)
+    return F.from_json(coluna, esquema, {"mode": "FAILFAST"})
+
+
 def aplicar_regras(df: DataFrame, regras: dict, rotulo: str) -> DataFrame:
     """Aplica regras de qualidade, imprime o total barrado por cada uma e retorna o df válido."""
     total = df.count()
     print(f"\n=== Qualidade · {rotulo} === (total bruto: {total})")
     validos = df
     for nome, cond in regras.items():
-        barrados = validos.filter(~cond).count()
-        validos = validos.filter(cond)
+        passou = F.coalesce(cond, F.lit(False))
+        barrados = validos.filter(~passou).count()
+        validos = validos.filter(passou)
         print(f"  Regra '{nome}': barrados = {barrados}")
     print(f"  -> válidos: {validos.count()} / {total}")
     return validos
@@ -44,8 +53,14 @@ def merge_prata(df: DataFrame, tabela: str, chaves: list[str]):
 # COMMAND ----------
 # MAGIC %md ## Prata · Clima (explode das listas paralelas do Open-Meteo)
 # COMMAND ----------
-reg = (spark.table("bronze_clima")
-       .select(F.explode("registros").alias("r"))
+clima_raw = spark.table("bronze_clima")
+esquema_clima = """
+ARRAY<STRUCT<bairro_id: STRING, bairro: STRING, hourly: STRUCT<
+    time: ARRAY<STRING>, precipitation: ARRAY<STRING>, temperature_2m: ARRAY<STRING>
+>>>
+"""
+reg = (clima_raw
+       .select(F.explode(ler_array_json(clima_raw, "registros", esquema_clima)).alias("r"))
        .select("r.bairro_id", "r.bairro", "r.hourly"))
 
 zipped = reg.select(
@@ -72,8 +87,14 @@ merge_prata(clima_ok, "prata_clima", ["bairro_id", "data_hora"])
 # COMMAND ----------
 # MAGIC %md ## Prata · Ocorrências — MASCARAMENTO LGPD (hash SHA-256)
 # COMMAND ----------
-oc = (spark.table("bronze_ocorrencias")
-      .select(F.explode("ocorrencias").alias("o")).select("o.*"))
+oc_raw = spark.table("bronze_ocorrencias")
+esquema_ocorrencias = """
+ARRAY<STRUCT<protocolo: STRING, bairro_id: STRING, data_hora: STRING, nome: STRING,
+    telefone: STRING, cpf: STRING, relato: STRING, nivel_agua_cm: STRING>>
+"""
+oc = (oc_raw
+      .select(F.explode(ler_array_json(oc_raw, "ocorrencias", esquema_ocorrencias)).alias("o"))
+      .select("o.*"))
 
 oc_mask = oc.select(
     "protocolo", "bairro_id",
@@ -98,12 +119,16 @@ merge_prata(oc_ok, "prata_ocorrencias", ["protocolo"])
 # MAGIC %md ## Prata · População (extrai o total do município do payload IBGE)
 # COMMAND ----------
 pop_raw = spark.table("bronze_populacao")
-# payload IBGE: resultados[0].series[0].serie = {"<ano>": "<valor>"}
+esquema_populacao = (
+    "ARRAY<STRUCT<resultados: ARRAY<STRUCT<series: ARRAY<STRUCT<serie: MAP<STRING,STRING>>>>>>>"
+)
+# O ano no objeto "serie" é uma chave, não uma coluna fixa.
 pop = (pop_raw
-       .select("data_coleta", F.explode("payload").alias("v"))
-       .select("data_coleta",
-               F.col("v.resultados")[0]["series"][0]["serie"].alias("serie"))
-       .select("data_coleta", F.map_values("serie")[0].cast("long").alias("populacao_municipio_sp")))
+       .select("data_coleta", F.explode(ler_array_json(pop_raw, "payload", esquema_populacao)).alias("v"))
+       .select("data_coleta", F.explode("v.resultados").alias("resultado"))
+       .select("data_coleta", F.explode("resultado.series").alias("serie"))
+       .select("data_coleta", F.expr("try_cast(element_at(serie.serie, array_max(map_keys(serie.serie)))"
+                                    " AS BIGINT)").alias("populacao_municipio_sp")))
 
 pop_ok = aplicar_regras(pop, {
     "populacao_positiva": F.col("populacao_municipio_sp") > 0,

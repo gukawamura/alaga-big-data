@@ -21,6 +21,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import logging
 import random
 from pathlib import Path
 
@@ -162,12 +163,20 @@ def conferir_chegada(ds, **_):
     print(f"[conferir] OK — 3 arquivos presentes para {ds}")
 
 
+def registrar_falha(context):
+    execucao = context["dag_run"]
+    logging.getLogger(__name__).error(
+        "[coleta] DAG %s falhou na execução %s", execucao.dag_id, execucao.run_id
+    )
+
+
 with DAG(
     dag_id="gs_coleta_alaga",
     schedule="@daily",
     start_date=pendulum.datetime(2026, 10, 1, tz="America/Sao_Paulo"),
     catchup=True,
     max_active_runs=1,
+    on_failure_callback=registrar_falha,
     tags=["gs", "alaga-alerta", "big-data"],
 ) as dag:
     inicio = EmptyOperator(task_id="inicio")

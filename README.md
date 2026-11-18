@@ -45,26 +45,73 @@ População por bairro em `config/bairros.json` (derivada de dados abertos; usad
 ## Como reproduzir
 
 ### 1. Airflow (coleta)
-```bash
-# com Astro CLI (recomendado no Windows + Docker Desktop)
-astro dev init          # só na 1ª vez, na pasta big-data/
-astro dev start
-```
-No Airflow UI (**Admin → Variables**) crie:
-- `alaga_chegada_dir` = `/opt/airflow/chegada`
-- `alaga_config_dir` = `/opt/airflow/config`
 
-Copie `config/bairros.json` para a pasta montada e ligue a DAG **`gs_coleta_alaga`**.
-Com `catchup=True`, o backfill gera vários dias de arquivos em `chegada/`.
+Na raiz do repositório, com Docker Desktop ativo, crie uma vez o arquivo local
+`.env` com `ALAGA_AIRFLOW_DB_PASSWORD` definida para uma senha aleatória
+alfanumérica. Mantenha esse arquivo fora do Git e guarde a mesma senha para
+reutilizar o volume do PostgreSQL.
+
+```bash
+docker compose -f compose.airflow.yml up -d
+```
+
+Abra `http://127.0.0.1:8080` com o usuário `admin`. O `standalone` gera a senha
+local em `/opt/airflow/standalone_admin_password.txt` no contêiner `airflow`.
+O Compose monta `config/`, `dags/` e `chegada/` e
+configura o Airflow 2.10.5 com `LocalExecutor` e PostgreSQL. Em **Admin →
+Variables**, os diretórios podem ser ajustados por `alaga_chegada_dir` e
+`alaga_config_dir`. Os valores padrão já correspondem aos caminhos do Compose.
+
+Para reproduzir duas datas específicas, execute o backfill:
+
+```bash
+docker compose -f compose.airflow.yml exec -T airflow airflow dags backfill --start-date 2026-10-02T00:00:00-03:00 --end-date 2026-10-03T00:00:00-03:00 gs_coleta_alaga
+```
+
+Confira as execuções no Airflow. Clima, população e ocorrências podem rodar
+juntas, e `conferir_chegada` começa quando as três terminam com sucesso.
+Falhas da DAG são registradas no log do Airflow. Para manter a coleta diária,
+ative a DAG pela interface. Com `catchup=True`, a ativação também agenda as
+datas anteriores que ainda não foram processadas.
 
 ### 2. Databricks (lakehouse)
-1. Crie o Volume `workspace.gs.chegada` e envie os arquivos de `chegada/` **em 2 lotes**
+Se a equipe ainda não tiver workspace, crie um no
+[Databricks Free Edition](https://docs.databricks.com/aws/en/getting-started/free-edition)
+e confirme no catálogo o nome disponível antes de importar os notebooks.
+
+1. No catálogo `workspace`, crie o esquema `gs` e o Volume gerenciado
+   `chegada`. Se o catálogo tiver outro nome, ajuste as referências nos
+   notebooks e nas consultas SQL. Envie os arquivos de `chegada/` **em 2 lotes**
    (ex.: lote 1 = dias 01–03/10; lote 2 = dias 04–06/10) — requisito 04.
 2. Rode os notebooks em ordem:
    - `databricks/01_bronze.py` — Auto Loader incremental (rode 2× para provar que não duplica).
    - `databricks/02_prata.py` — tipos, MERGE, 3 regras de qualidade, mascaramento LGPD.
    - `databricks/03_ouro.py` — `dim_bairro`, `dim_tempo`, `fato_risco_bairro_hora`.
 3. Execute `databricks/consultas_ouro.sql` (5 consultas, 1 de impacto).
+
+### 3. Previsão vigente para o MVP
+
+1. No Airflow, ative `gs_previsao_alaga` e dispare uma execução. A DAG
+   coleta dados reais do Open-Meteo a cada hora, sem backfill, em
+   `chegada/previsao/`. Para uma coleta avulsa, execute
+   `python dags/alaga_previsao.py` na pasta `big-data`.
+2. No Volume `workspace.gs.chegada`, crie a subpasta `previsao` e envie
+   o JSON gerado. Execute `databricks/04_previsao_mvp.py` após os notebooks
+   01 a 03. Esse notebook cria a Bronze e a Prata da previsão e a visão
+   Ouro `workspace.gs.fato_previsao_bairro_hora`. A trilha diária continua
+   armazenando as observações históricas.
+3. Baixe o arquivo `part-*.csv` de `exportacao_mvp/` no Volume. No
+   diretório do MVP, com a mesma `API_KEY` do servidor no ambiente, execute
+   `python scripts/importar_ouro.py --url http://127.0.0.1:8000 --csv CAMINHO_DO_CSV --vigente`.
+4. Abra **Meu bairro → Penha** e confira **Ouro (Databricks)** na página.
+   Em `GET /risco/penha`, confirme `fonte: ouro` e compare a precipitação
+   e o horário com a exportação. Horários no CSV têm fuso explícito UTC.
+   O MVP tem previsão direta para as áreas que não receberam dados da Ouro.
+
+A exportação filtra as próximas 12 horas e previsões coletadas nas últimas
+3 horas. A transferência de arquivos e a publicação pelo importador são
+manuais neste fluxo. Para demonstrar idempotência, reexecute o notebook
+04 sem enviar arquivo novo e registre `novos=0` na Bronze.
 
 ## Mapa requisitos → onde está
 
@@ -83,10 +130,11 @@ Com `catchup=True`, o backfill gera vários dias de arquivos em `chegada/`.
 ## Estrutura do repositório
 ```
 big-data/
-├─ dags/gs_coleta_alaga.py        # DAG de coleta (Airflow)
+├─ compose.airflow.yml            # Airflow LocalExecutor + PostgreSQL
+├─ dags/                          # Coleta histórica e previsão horária
 ├─ config/bairros.json            # bairros de SP (lat/long + população)
 ├─ databricks/
-│  ├─ 01_bronze.py  02_prata.py  03_ouro.py
+│  ├─ 01_bronze.py  02_prata.py  03_ouro.py  04_previsao_mvp.py
 │  └─ consultas_ouro.sql
 ├─ amostras/                      # um pouco de cada fonte (para o repositório)
 ├─ requirements.txt  .gitignore  README.md
